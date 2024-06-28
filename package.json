@@ -1,0 +1,40 @@
+{
+	"name": "tnmd",
+	"author": {
+		"name": "lumiknit",
+		"email": "aasr4r4@gmail.com"
+	},
+	"license": "Mozilla Public License 2.0",
+	"homepage": "https://github.com/lumiknit/tnmd#README.md",
+	"description": "That's not my data! - Web-based data manimuplation tool",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"size-report": "vite-bundle-visualizer",
+		"format": "prettier --write .",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@lumiknit/solid-fekit": "github:lumiknit/solid-fekit#v0.1.1",
+		"smol-toml": "^1.2.2",
+		"solid-icons": "^1.1.0",
+		"solid-js": "^1.8.17",
+		"solid-toast": "^0.5.0",
+		"yaml": "^2.4.5"
+	},
+	"devDependencies": {
+		"eslint": "^9.5.0",
+		"eslint-plugin-solid": "^0.14.1",
+		"prettier": "^3.3.2",
+		"sass": "^1.77.6",
+		"typescript": "^5.2.2",
+		"vite": "^5.3.1",
+		"vite-bundle-visualizer": "^1.2.1",
+		"vite-plugin-solid": "^2.10.2",
+		"vitest": "^1.6.0"
+	}
+}
