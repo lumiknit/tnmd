@@ -1,8 +1,14 @@
-/**
- * Change the data view.
- * More specifically, it will change the data type (json, etc.).
- */
-export type ViewAction = {
-	type: "view";
-	old: string;
+import { DataSet } from "./data";
+
+export type ActionType =
+	| "changeType"
+	| "changeStr"
+	| "parse"
+	| "stringify"
+	| "runJS";
+
+export type Action = {
+	type: ActionType;
+	oldD: DataSet;
+	newD: DataSet;
 };

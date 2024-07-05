@@ -19,9 +19,11 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@codemirror/commands": "^6.6.0",
 		"@codemirror/language": "^6.10.2",
 		"@codemirror/legacy-modes": "^6.4.0",
 		"@codemirror/state": "^6.4.1",
+		"@codemirror/view": "^6.28.4",
 		"@lumiknit/solid-fekit": "github:lumiknit/solid-fekit#v0.1.1",
 		"bootstrap": "5.3.3",
 		"codemirror": "^6.0.1",
@@ -29,6 +31,7 @@
 		"solid-icons": "^1.1.0",
 		"solid-js": "^1.8.17",
 		"solid-toast": "^0.5.0",
+		"thememirror": "^2.0.1",
 		"yaml": "^2.4.5"
 	},
 	"devDependencies": {

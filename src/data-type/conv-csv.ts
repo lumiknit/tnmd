@@ -3,7 +3,7 @@ import { IDataConverter } from "./i-converter";
 
 class CSVWithHeaderConverter implements IDataConverter {
 	get type() {
-		return "csv-with-header";
+		return "csv-with-headers";
 	}
 
 	parse(data: string): RawData {

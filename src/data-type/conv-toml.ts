@@ -1,4 +1,4 @@
-import toml from "smol-toml";
+import { stringify, parse } from "smol-toml";
 
 import { RawData } from ".";
 import { IDataConverter } from "./i-converter";
@@ -10,18 +10,18 @@ class TOMLConverter implements IDataConverter {
 	}
 
 	parse(data: string): RawData {
-		const parsed = toml.parse(data);
+		const parsed = parse(data);
 		return convertAnyToRawData(parsed);
 	}
 
 	stringify(data: RawData): string {
 		const a = convertRawDataToAny(data);
-		return toml.stringify(a);
+		return stringify(a);
 	}
 
 	minify(data: RawData): string {
 		const a = convertRawDataToAny(data);
-		return toml.stringify(a);
+		return stringify(a);
 	}
 }
 
