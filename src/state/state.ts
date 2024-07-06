@@ -1,6 +1,6 @@
 import { Accessor, Setter, batch, createSignal } from "solid-js";
 import { DataType } from "../data-type";
-import { ActionType, Action } from ".";
+import { ActionType, Action, applyAction } from ".";
 import { converters } from "../data-type/converters";
 import { executeScript } from "./script";
 import { DataSet } from "./data";
@@ -73,58 +73,10 @@ export const execAction = (
 		state.setErr("");
 
 		const d = state.d();
-		const newD = { ...d };
-
-		// Execute the action
-		const conv = converters.get(d.type);
-		if (!conv) {
-			state.setErr(`Convert for the data type ${d.type} is not found`);
-			return;
-		}
+		let newD: DataSet;
 
 		try {
-			switch (actionType) {
-				case "changeType":
-					if (updateD && updateD.type) {
-						newD.type = updateD.type;
-						const newConv = converters.get(newD.type);
-						if (!newConv) {
-							throw new Error(
-								`Convert for the data type ${newD.type} is not found`,
-							);
-						}
-						newD.str = newConv.stringify(newD.data);
-					}
-					break;
-				case "changeStr":
-					if (updateD && updateD.str) {
-						newD.str = updateD.str;
-						newD.data = conv.parse(newD.str);
-					}
-					break;
-				case "parse":
-					if (typeof d.data !== "string") {
-						throw new Error("Expected string data to parse");
-					}
-					newD.data = conv.parse(d.data as string);
-					newD.str = conv.stringify(newD.data);
-					break;
-				case "stringify":
-					newD.data = conv.stringify(d.data);
-					newD.str = conv.stringify(newD.data);
-					break;
-				case "runJS":
-					if (updateD && updateD.script) {
-						const exeResult = executeScript(updateD.script!, d.data);
-						if (exeResult.error) {
-							throw exeResult.error;
-						}
-						newD.data = exeResult.result;
-						newD.str = conv.stringify(newD.data);
-						newD.script = updateD.script;
-					}
-					break;
-			}
+			newD = applyAction(d, actionType, updateD);
 		} catch (e) {
 			state.setErr("Failed to execute action: " + e);
 			console.error(e);

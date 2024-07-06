@@ -11,7 +11,7 @@ import { dracula, rosePineDawn } from "thememirror";
 
 const emptyParser = (name: string): StreamParser<unknown> => ({
 	name,
-	token: function (stream, state) {
+	token: function (stream) {
 		stream.eatWhile(/./);
 		return null;
 	},

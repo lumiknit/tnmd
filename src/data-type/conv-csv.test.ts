@@ -4,12 +4,11 @@ import { expect, test } from "vitest";
 
 import { getCSVWithHeaderConverter } from "./conv-csv";
 import { RawData } from ".";
-import { parse } from "yaml";
 
 const conv = getCSVWithHeaderConverter();
 
 test("type", () => {
-	expect(conv.type).toBe("csv-with-header");
+	expect(conv.type).toBe("csv-with-headers");
 });
 
 const parseMinTest = (name: string, data: string, expected: RawData) => {
