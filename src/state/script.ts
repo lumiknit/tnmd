@@ -1,3 +1,5 @@
+import { mapRawData } from "../data-type";
+
 type Outputs = {
 	outputs: string[];
 };
@@ -22,7 +24,11 @@ type ExecutionResult = {
 /**
  * Execute javascript, which is a function takes single argument.
  */
-export const executeScript = (script: string, arg: any): ExecutionResult => {
+export const executeScript = (
+	script: string,
+	arg: any,
+	walk?: boolean,
+): ExecutionResult => {
 	const outputs = {
 		outputs: [],
 	};
@@ -30,7 +36,8 @@ export const executeScript = (script: string, arg: any): ExecutionResult => {
 	try {
 		// Create a function with script, with argument 'console'
 		const f = new Function("console", "return(" + script.trim() + ")");
-		const res = f(c)(arg);
+		const handler = f(c);
+		const res = walk ? mapRawData(arg, handler) : handler(arg);
 		return {
 			outputs: outputs.outputs,
 			result: res,

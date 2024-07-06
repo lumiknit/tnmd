@@ -1,5 +1,6 @@
 import { RawData } from ".";
 import { IDataConverter } from "./i-converter";
+import { Parser } from "./parser";
 
 class CSVWithHeaderConverter implements IDataConverter {
 	get type() {
@@ -7,63 +8,54 @@ class CSVWithHeaderConverter implements IDataConverter {
 	}
 
 	parse(data: string): RawData {
-		let p = 0;
+		const p = new Parser(data);
 		const lines = [];
 		let line: RawData[] = [];
-		while (p < data.length) {
-			// If new line, push the line to lines
-			if (data[p] === "\n") {
-				if (line.length > 0) {
-					lines.push(line);
-					line = [];
-				}
-				p++;
-				continue;
-			}
-
-			if (data[p] === '"') {
-				const s = ++p;
-				// Parse string
-				while (p < data.length) {
-					if (data[p] === '"') {
-						if (data[p + 1] === '"') {
-							p++;
-						} else {
-							break;
+		while (!p.isEOF()) {
+			p.checkProgress();
+			switch (p.peek()) {
+				// If new line, push the line to lines
+				case "\n":
+					{
+						if (line.length > 0) {
+							lines.push(line);
+							line = [];
 						}
+						p.skip(1);
 					}
-					p++;
+					break;
+				// If quote, parse as string
+				case '"':
+					{
+						// Parse string
+						p.skip(1);
+						p.save();
+						while (!p.isEOF()) {
+							if (p.equal('""')) {
+								p.skip(2);
+							} else if (p.equal('"')) {
+								break;
+							} else {
+								p.skip(1);
+							}
+						}
+						line.push(p.fin().replace(/""/g, '"'));
+						p.eatString('"');
+					}
+					break;
+				default: {
+					const v = p.eatUntil(/[\n,"]/g);
+					if (v !== undefined) line.push(v);
 				}
-				line.push(data.slice(s, p).replace(/""/g, '"'));
-				// Skip quote
-				if (data[p] === '"') p++;
-			} else {
-				const s = p;
-				// Parse until next comma or new line
-				while (p < data.length && data[p] !== "\n" && data[p] !== ",") {
-					p++;
-				}
-				line.push(data.slice(s, p).trim());
 			}
-			// Skip comma
-			if (data[p] === ",") {
-				p++;
-			}
+			p.eatString(",");
 		}
 		if (line.length > 0) {
 			lines.push(line);
 		}
 		// Convert to Map
-		const result = [];
 		const keys = lines[0].map(v => "" + v);
-		for (let i = 1; i < lines.length; i++) {
-			const row = new Map();
-			for (let j = 0; j < keys.length; j++) {
-				row.set(keys[j], lines[i][j]);
-			}
-			result.push(row);
-		}
-		return result;
+		return lines.slice(1).map(row => new Map(keys.map((k, j) => [k, row[j]])));
 	}
 
 	stringify(data: RawData): string {

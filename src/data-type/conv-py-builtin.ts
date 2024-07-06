@@ -71,15 +71,18 @@ class PyBuiltinConverter implements IDataConverter {
 					if (v !== undefined) {
 						p.raiseError(`Unexpected ${c}, expect closing, ',', or ':'`);
 					}
-					stack.push(c === '[' ? [[], 0] : [new Map(), ""]);
+					stack.push(c === "[" ? [[], 0] : [new Map(), ""]);
 					p.skip(1);
 					break;
 				case "]":
 				case "}":
 					if (stack.length === 0) {
 						p.raiseError(`Unexpected ${c}, there was no array opening`);
-					} else if ((c === ']') !== Array.isArray(stack[stack.length - 1][0])) {
-						p.raiseError(`Unexpected ${c}, expect ${c === ']' ? '}' : ']'}`);
+					} else if (
+						(c === "]") !==
+						Array.isArray(stack[stack.length - 1][0])
+					) {
+						p.raiseError(`Unexpected ${c}, expect ${c === "]" ? "}" : "]"}`);
 					}
 					if (v !== undefined) {
 						pushValueToSpreadedRawData(stack, v);

@@ -15,4 +15,7 @@ export type DataSet = {
 
 	/** JS Script */
 	script: string;
+
+	/** Script executed for the data */
+	scriptWalk?: boolean;
 };

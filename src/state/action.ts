@@ -58,7 +58,7 @@ export const applyAction = (
 			break;
 		case "runJS":
 			if (updateD && updateD.script) {
-				const exeResult = executeScript(updateD.script!, d.data);
+				const exeResult = executeScript(updateD.script!, d.data, d.scriptWalk);
 				if (exeResult.error) {
 					throw exeResult.error;
 				}
