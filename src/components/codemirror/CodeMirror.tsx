@@ -3,7 +3,11 @@ import { Component, createEffect, onCleanup, onMount } from "solid-js";
 import { EditorView, basicSetup } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { Compartment, EditorState } from "@codemirror/state";
-import { StreamLanguage, StreamParser } from "@codemirror/language";
+import {
+	LanguageSupport,
+	StreamLanguage,
+	StreamParser,
+} from "@codemirror/language";
 import { indentWithTab } from "@codemirror/commands";
 import { dracula, rosePineDawn } from "thememirror";
 
@@ -17,7 +21,10 @@ const emptyParser = (name: string): StreamParser<unknown> => ({
 	},
 });
 
-const LOAD_LANG = new Map<string, () => Promise<StreamParser<unknown>>>([
+const LOAD_LANG = new Map<
+	string,
+	() => Promise<StreamParser<unknown> | LanguageSupport>
+>([
 	["c", async () => (await import("@codemirror/legacy-modes/mode/clike")).c],
 	["csv", async () => emptyParser("csv")],
 	[
@@ -31,14 +38,17 @@ const LOAD_LANG = new Map<string, () => Promise<StreamParser<unknown>>>([
 	],
 	[
 		"javascript",
-		async () =>
-			(await import("@codemirror/legacy-modes/mode/javascript")).javascript,
+		async () => (await import("@codemirror/lang-javascript")).javascript(),
 	],
 	[
 		"json",
-		async () => (await import("@codemirror/legacy-modes/mode/javascript")).json,
+		async () => (await import("@codemirror/lang-javascript")).javascript(),
 	],
 	["lua", async () => (await import("@codemirror/legacy-modes/mode/lua")).lua],
+	[
+		"markdown",
+		async () => (await import("@codemirror/lang-markdown")).markdown(),
+	],
 	[
 		"python",
 		async () => (await import("@codemirror/legacy-modes/mode/python")).python,
@@ -92,6 +102,11 @@ const CodeMirror: Component<Props> = props => {
 		});
 	};
 
+	const wrapLang = (l: StreamParser<unknown> | LanguageSupport) => {
+		if (l instanceof LanguageSupport) return l;
+		else return StreamLanguage.define(l);
+	};
+
 	onMount(async () => {
 		const lang = await LOAD_LANG.get(props.grammar)!();
 
@@ -107,7 +122,7 @@ const CodeMirror: Component<Props> = props => {
 			extensions: [
 				basicSetup,
 				keymap.of([indentWithTab]),
-				langCompartment.of(StreamLanguage.define(lang)),
+				langCompartment.of(wrapLang(lang)),
 				themeCompartment.of(getTheme(prefersDark.matches)),
 			],
 		});
@@ -135,7 +150,7 @@ const CodeMirror: Component<Props> = props => {
 		if (view && l) {
 			const mod = await loadLanguageExtension(l);
 			view.dispatch({
-				effects: langCompartment.reconfigure(StreamLanguage.define(mod)),
+				effects: langCompartment.reconfigure(wrapLang(mod)),
 			});
 		}
 	});

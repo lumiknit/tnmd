@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
@@ -9,7 +10,7 @@ export default defineConfig({
 	preview: {
 		port: 7333,
 	},
-	plugins: [solid()],
+	plugins: [solid(), nodeResolve()],
 	resolve: {
 		alias: [{ find: "@", replacement: "/src" }],
 	},

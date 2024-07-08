@@ -1,9 +1,7 @@
 import { Accessor, Setter, batch, createSignal } from "solid-js";
 import { DataType } from "../data-type";
 import { ActionType, Action, applyAction } from ".";
-import { converters } from "../data-type/converters";
-import { executeScript } from "./script";
-import { DataSet } from "./data";
+import { EditSet, loadInitEditSet, storeEditSet } from "./edit";
 import toast from "solid-toast";
 
 export type DataHistory = {
@@ -20,8 +18,9 @@ export type DataHistory = {
  * The state of the application
  */
 export type DataState = {
-	d: Accessor<DataSet>;
-	setD: Setter<DataSet>;
+	d: Accessor<EditSet>;
+	setD: Setter<EditSet>;
+	updateD: (u: (e: EditSet) => EditSet) => void;
 
 	err: Accessor<string>;
 	setErr: Setter<string>;
@@ -33,16 +32,15 @@ export type DataState = {
 /**
  * Create a new DataState object
  */
-export const createDataState = (): DataState => {
-	const [d, setD] = createSignal<DataSet>(
-		{
-			type: "text",
-			str: "",
-			data: "",
-			script: "",
-		},
-		{ equals: false },
-	);
+export const createDataState = async (): Promise<DataState> => {
+	const initDataSet = await loadInitEditSet();
+	const [d, setD] = createSignal<EditSet>(initDataSet, { equals: false });
+	const updateD = (u: (e: EditSet) => EditSet) =>
+		setD(d => {
+			const newD = u(d);
+			storeEditSet(newD);
+			return newD;
+		});
 
 	const [err, setErr] = createSignal<string>("");
 
@@ -57,6 +55,7 @@ export const createDataState = (): DataState => {
 	return {
 		d,
 		setD,
+		updateD,
 		err,
 		setErr,
 		history,
@@ -67,13 +66,13 @@ export const createDataState = (): DataState => {
 export const execAction = (
 	state: DataState,
 	actionType: ActionType,
-	updateD?: Partial<DataSet>,
+	updateD?: Partial<EditSet>,
 ) => {
 	batch(() => {
 		state.setErr("");
 
 		const d = state.d();
-		let newD: DataSet;
+		let newD: EditSet;
 
 		try {
 			newD = applyAction(d, actionType, updateD);
@@ -93,7 +92,7 @@ export const execAction = (
 		}));
 
 		// Update d
-		state.setD(newD);
+		state.updateD(() => newD);
 	});
 };
 
@@ -119,13 +118,9 @@ export const restoreTo = (
 			throw new Error("Cannot redo");
 		}
 
-		if (idx >= cur) {
-			// Redo
-			state.setD(history.actions[idx - 1].newD);
-		} else {
-			state.setD(history.actions[idx].oldD);
-		}
-
+		let d =
+			idx >= cur ? history.actions[idx - 1].newD : history.actions[idx].oldD;
+		state.updateD(() => d);
 		state.setErr("");
 		state.setHistory(h => ({
 			actions: h.actions,
@@ -153,9 +148,13 @@ export const execStringify = (state: DataState) => {
 };
 
 export const execJS = (state: DataState, script: string) => {
-	execAction(state, "runJS", { script });
+	execAction(state, "runJS", { script: { script } });
 };
 
-export const execSetText = (state: DataState, text: string) => {
-	execAction(state, "changeStr", { str: text });
+export const execSetText = (
+	state: DataState,
+	text: string,
+	overrideType?: ActionType,
+) => {
+	execAction(state, overrideType || "changeStr", { str: text });
 };

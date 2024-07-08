@@ -4,6 +4,8 @@ import { DataState, execParse, execStringify } from "../../state";
 import { TbCodeDots, TbQuote } from "solid-icons/tb";
 import { Dynamic } from "solid-js/web";
 import JsActionView from "./ActionJSView";
+import ActionGPTView from "./ActionGPTView";
+import ActionGeminiView from "./ActionGeminiView";
 
 type Props = {
 	z: DataState;
@@ -43,6 +45,14 @@ const ACTION_TAB_INFO: ActionTabInfo[] = [
 	{
 		label: "JS",
 		component: JsActionView,
+	},
+	{
+		label: "GPT",
+		component: ActionGPTView,
+	},
+	{
+		label: "Gemini",
+		component: ActionGeminiView,
 	},
 ];
 

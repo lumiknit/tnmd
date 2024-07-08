@@ -1,5 +1,5 @@
 import { converters } from "../data-type/converters";
-import { DataSet } from "./data";
+import { EditSet } from "./edit";
 import { executeScript } from "./script";
 
 export type ActionType =
@@ -7,21 +7,23 @@ export type ActionType =
 	| "changeStr"
 	| "parse"
 	| "stringify"
-	| "runJS";
+	| "runJS"
+	| "runGPT"
+	| "runGemini";
 
 export type Action = {
 	type: ActionType;
-	oldD: DataSet;
-	newD: DataSet;
+	oldD: EditSet;
+	newD: EditSet;
 };
 
 // Execute
 
 export const applyAction = (
-	d: DataSet,
+	d: EditSet,
 	actionType: ActionType,
-	updateD?: Partial<DataSet>,
-): DataSet => {
+	updateD?: Partial<EditSet>,
+): EditSet => {
 	const newD = { ...d };
 	const conv = converters.get(d.type)!;
 
@@ -39,6 +41,8 @@ export const applyAction = (
 			}
 			break;
 		case "changeStr":
+		case "runGPT":
+		case "runGemini":
 			if (updateD && updateD.str) {
 				newD.str = updateD.str;
 				newD.data = conv.parse(newD.str);
@@ -58,7 +62,11 @@ export const applyAction = (
 			break;
 		case "runJS":
 			if (updateD && updateD.script) {
-				const exeResult = executeScript(updateD.script!, d.data, d.scriptWalk);
+				const exeResult = executeScript(
+					updateD.script.script!,
+					d.data,
+					d.script.scriptWalk,
+				);
 				if (exeResult.error) {
 					throw exeResult.error;
 				}

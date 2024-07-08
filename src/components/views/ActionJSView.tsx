@@ -4,6 +4,7 @@ import { Component, For } from "solid-js";
 import CodeMirror from "../codemirror/CodeMirror";
 import { TbRocket, TbTrash } from "solid-icons/tb";
 import { SCRIPT_SAMPLES } from "../../state/script-samples";
+import { ScriptSet } from "../../state/edit";
 
 type Props = {
 	z: DataState;
@@ -12,16 +13,26 @@ type Props = {
 const JsActionView: Component<Props> = props => {
 	const handleRun = () => {
 		const script = props.z.d().script;
-		execJS(props.z, script);
+		execJS(props.z, script.script);
+	};
+
+	const updateScriptPart = (u: Partial<ScriptSet>) => {
+		props.z.updateD(d => ({
+			...d,
+			script: {
+				...d.script,
+				...u,
+			},
+		}));
 	};
 
 	const handleClear = () => {
-		props.z.setD(d => ({
-			...d,
+		updateScriptPart({
 			script: "",
-		}));
+		});
 		toast.success("Cleared");
 	};
+
 	return (
 		<div>
 			<div class="btn-group my-2">
@@ -41,11 +52,14 @@ const JsActionView: Component<Props> = props => {
 						<input
 							class="form-check-input"
 							type="checkbox"
-							checked={props.z.d().scriptWalk}
+							checked={props.z.d().script.scriptWalk}
 							onChange={e =>
 								props.z.setD(d => ({
 									...d,
-									scriptWalk: e.currentTarget.checked,
+									script: {
+										...d.script,
+										scriptWalk: e.currentTarget.checked,
+									},
 								}))
 							}
 						/>
@@ -57,8 +71,8 @@ const JsActionView: Component<Props> = props => {
 			<div class="cm-wrap">
 				<CodeMirror
 					grammar="javascript"
-					text={props.z.d().script}
-					onChange={text => props.z.setD(d => ({ ...d, script: text }))}
+					text={props.z.d().script.script}
+					onChange={text => updateScriptPart({ script: text })}
 				/>
 			</div>
 
@@ -77,11 +91,10 @@ const JsActionView: Component<Props> = props => {
 						<button
 							class="btn btn-sm btn-outline-secondary m-1"
 							onClick={() =>
-								props.z.setD(d => ({
-									...d,
+								updateScriptPart({
 									script: sample.code,
 									scriptWalk: sample.walk || false,
-								}))
+								})
 							}>
 							{sample.name}
 						</button>

@@ -8,40 +8,47 @@ type Props = {
 	z: DataState;
 };
 
-const GEMINI_MODELS = ["gemini-1.0-pro", "gemini-1.5-flash", "gemini-1.5-pro"];
+const DEFAULT_OPENAI_BASE_URL = "https://api.openai.com";
+const GPT_MODELS = ["gpt-3.5-turbo", "gpt-4-turbo", "gpr-4o"];
 
 const chatRequest = async (
 	systemPrompt: string,
 	userPrompt: string,
 	apiKey: string,
+	baseUrl: string,
 	model: string,
 ): Promise<string> => {
-	const textPart = (role: string, text: string) => ({
-		role,
-		parts: [{ text }],
-	});
-	const prompt = systemPrompt + "\n\nUser:\n" + userPrompt;
-
-	const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-	const resp = await fetch(url, {
+	const resp = await fetch(`${baseUrl}/v1/chat/completions`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
+			Authorization: `Bearer ${apiKey}`,
 		},
 		body: JSON.stringify({
-			contents: [textPart("user", prompt)],
+			model,
+			messages: [
+				{
+					role: "system",
+					content: systemPrompt,
+				},
+				{
+					role: "user",
+					content: userPrompt,
+				},
+			],
 		}),
 	});
 	if (!resp.ok) {
 		throw new Error("Failed to openai request: " + (await resp.text()));
 	}
 	const data = await resp.json();
-	return data.candidates[0].content.parts[0].text;
+	return data.choices[0].message.content;
 };
 
-const ActionGeminiView: Component<Props> = props => {
+const ActionGPTView: Component<Props> = props => {
 	let promptRef: HTMLTextAreaElement;
 	let apiKeyRef: HTMLInputElement;
+	let baseUrlRef: HTMLInputElement;
 
 	const handleRun = async () => {
 		const format = props.z.d().type;
@@ -49,19 +56,20 @@ const ActionGeminiView: Component<Props> = props => {
 
 		const prompt = promptRef.value.replace(/\(\(format\)\)/g, format);
 		const apiKey = apiKeyRef.value;
-		const model = props.z.d().llm.geminiModel;
+		const baseUrl = baseUrlRef.value || DEFAULT_OPENAI_BASE_URL;
+		const model = props.z.d().llm.gptModel;
 
 		toast.promise(
-			chatRequest(prompt, data, apiKey, model),
+			chatRequest(prompt, data, apiKey, baseUrl, model),
 			{
-				loading: "Requested to Google Gemini...",
+				loading: "Requested to OpenAI...",
 				success: response => {
-					execSetText(props.z, response, "runGemini");
+					execSetText(props.z, response, "runGPT");
 					return <> Success! </>;
 				},
 				error: e => {
 					console.error(e);
-					return <> Gemini Error: {"" + e}</>
+					return <> OpenAI Error: {"" + e}</>
 				},
 			},
 		)
@@ -92,9 +100,30 @@ const ActionGeminiView: Component<Props> = props => {
 				<label>Prompt</label>
 			</div>
 
+			<div class="form-floating mb-3">
+				<input
+					ref={baseUrlRef!}
+					type="text"
+					class="form-control"
+					placeholder="Base URL"
+					value={props.z.d().llm.gptBaseURL}
+					onChange={e => {
+						const value = e.currentTarget.value;
+						props.z.updateD(d => ({
+							...d,
+							llm: {
+								...d.llm,
+								gptBaseURL: value,
+							},
+						}));
+					}}
+				/>
+				<label>Base URL (Default is {DEFAULT_OPENAI_BASE_URL})</label>
+			</div>
+
 			<small>
 				You can find your API key here:{" "}
-				<a href="https://aistudio.google.com/app/apikey" target="_blank">
+				<a href="https://platform.openai.com/api-keys" target="_blank">
 					API Keys
 				</a>
 			</small>
@@ -104,14 +133,14 @@ const ActionGeminiView: Component<Props> = props => {
 					type="text"
 					class="form-control"
 					placeholder="API Key"
-					value={props.z.d().llm.geminiKey}
+					value={props.z.d().llm.gptKey}
 					onChange={e => {
 						const value = e.currentTarget.value;
 						props.z.updateD(d => ({
 							...d,
 							llm: {
 								...d.llm,
-								geminiKey: value,
+								gptKey: value,
 							},
 						}));
 					}}
@@ -128,13 +157,13 @@ const ActionGeminiView: Component<Props> = props => {
 							...d,
 							llm: {
 								...d.llm,
-								geminiModel: value,
+								gptModel: value,
 							},
 						}));
 					}}>
-					<For each={GEMINI_MODELS}>
+					<For each={GPT_MODELS}>
 						{m => (
-							<option value={m} selected={m === props.z.d().llm.geminiModel}>
+							<option value={m} selected={m === props.z.d().llm.gptModel}>
 								{m}
 							</option>
 						)}
@@ -150,4 +179,4 @@ const ActionGeminiView: Component<Props> = props => {
 	);
 };
 
-export default ActionGeminiView;
+export default ActionGPTView;
