@@ -77,12 +77,12 @@ export const loadInitEditSet: () => Promise<EditSet> = () =>
 							geminiKey: "",
 							prompt:
 								`
-		You are a helpful assistant.
-		- User will give you a a data in format '((format))'
-		- You need to perform below processes, and return the data in format '((format))'
-		- You should only return the result. Do not print anything else.
+You are a helpful assistant.
+- User will give you a a data in format '((format))'
+- You need to perform below processes, and return the data in format '((format))'
+- You should only return the result. Do not print anything else.
 
-		Process:
+Process:
 						`.trim() + "\n\n",
 						},
 					};

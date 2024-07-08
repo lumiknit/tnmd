@@ -51,20 +51,17 @@ const ActionGeminiView: Component<Props> = props => {
 		const apiKey = apiKeyRef.value;
 		const model = props.z.d().llm.geminiModel;
 
-		toast.promise(
-			chatRequest(prompt, data, apiKey, model),
-			{
-				loading: "Requested to Google Gemini...",
-				success: response => {
-					execSetText(props.z, response, "runGemini");
-					return <> Success! </>;
-				},
-				error: e => {
-					console.error(e);
-					return <> Gemini Error: {"" + e}</>
-				},
+		toast.promise(chatRequest(prompt, data, apiKey, model), {
+			loading: "Requested to Google Gemini...",
+			success: response => {
+				execSetText(props.z, response, "runGemini");
+				return <> Success! </>;
 			},
-		)
+			error: e => {
+				console.error(e);
+				return <> Gemini Error: {"" + e}</>;
+			},
+		});
 	};
 
 	return (

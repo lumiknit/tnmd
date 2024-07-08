@@ -59,20 +59,17 @@ const ActionGPTView: Component<Props> = props => {
 		const baseUrl = baseUrlRef.value || DEFAULT_OPENAI_BASE_URL;
 		const model = props.z.d().llm.gptModel;
 
-		toast.promise(
-			chatRequest(prompt, data, apiKey, baseUrl, model),
-			{
-				loading: "Requested to OpenAI...",
-				success: response => {
-					execSetText(props.z, response, "runGPT");
-					return <> Success! </>;
-				},
-				error: e => {
-					console.error(e);
-					return <> OpenAI Error: {"" + e}</>
-				},
+		toast.promise(chatRequest(prompt, data, apiKey, baseUrl, model), {
+			loading: "Requested to OpenAI...",
+			success: response => {
+				execSetText(props.z, response, "runGPT");
+				return <> Success! </>;
 			},
-		)
+			error: e => {
+				console.error(e);
+				return <> OpenAI Error: {"" + e}</>;
+			},
+		});
 	};
 
 	return (
