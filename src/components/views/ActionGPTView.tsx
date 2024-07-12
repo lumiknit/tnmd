@@ -3,6 +3,7 @@ import { Component, createSignal, For } from "solid-js";
 import { DataState, execSetText } from "../../state";
 import { TbSparkles } from "solid-icons/tb";
 import toast from "solid-toast";
+import Foldable from "../Foldable";
 
 type Props = {
 	z: DataState;
@@ -97,81 +98,83 @@ const ActionGPTView: Component<Props> = props => {
 				<label>Prompt</label>
 			</div>
 
-			<div class="form-floating mb-3">
-				<input
-					ref={baseUrlRef!}
-					type="text"
-					class="form-control"
-					placeholder="Base URL"
-					value={props.z.d().llm.gptBaseURL}
-					onChange={e => {
-						const value = e.currentTarget.value;
-						props.z.updateD(d => ({
-							...d,
-							llm: {
-								...d.llm,
-								gptBaseURL: value,
-							},
-						}));
-					}}
-				/>
-				<label>Base URL (Default is {DEFAULT_OPENAI_BASE_URL})</label>
-			</div>
-
-			<small>
-				You can find your API key here:{" "}
-				<a href="https://platform.openai.com/api-keys" target="_blank">
-					API Keys
-				</a>
-			</small>
-			<div class="form-floating mb-3">
-				<input
-					ref={apiKeyRef!}
-					type="text"
-					class="form-control"
-					placeholder="API Key"
-					value={props.z.d().llm.gptKey}
-					onChange={e => {
-						const value = e.currentTarget.value;
-						props.z.updateD(d => ({
-							...d,
-							llm: {
-								...d.llm,
-								gptKey: value,
-							},
-						}));
-					}}
-				/>
-				<label>API Key</label>
-			</div>
-
-			<div class="form-floating mb-2">
-				<select
-					class="form-select"
-					onChange={e => {
-						const value = e.currentTarget.value;
-						props.z.updateD(d => ({
-							...d,
-							llm: {
-								...d.llm,
-								gptModel: value,
-							},
-						}));
-					}}>
-					<For each={GPT_MODELS}>
-						{m => (
-							<option value={m} selected={m === props.z.d().llm.gptModel}>
-								{m}
-							</option>
-						)}
-					</For>
-				</select>
-				<label> Chat Model </label>
-			</div>
-
 			<button class="btn btn-primary" onClick={handleRun}>
 				<TbSparkles /> Run
 			</button>
+
+			<Foldable title="Advanced Options" class="mt-2">
+				<div class="form-floating mb-3">
+					<input
+						ref={baseUrlRef!}
+						type="text"
+						class="form-control"
+						placeholder="Base URL"
+						value={props.z.d().llm.gptBaseURL}
+						onChange={e => {
+							const value = e.currentTarget.value;
+							props.z.updateD(d => ({
+								...d,
+								llm: {
+									...d.llm,
+									gptBaseURL: value,
+								},
+							}));
+						}}
+					/>
+					<label>Base URL (Default is {DEFAULT_OPENAI_BASE_URL})</label>
+				</div>
+
+				<small>
+					You can find your API key here:{" "}
+					<a href="https://platform.openai.com/api-keys" target="_blank">
+						API Keys
+					</a>
+				</small>
+				<div class="form-floating mb-3">
+					<input
+						ref={apiKeyRef!}
+						type="text"
+						class="form-control"
+						placeholder="API Key"
+						value={props.z.d().llm.gptKey}
+						onChange={e => {
+							const value = e.currentTarget.value;
+							props.z.updateD(d => ({
+								...d,
+								llm: {
+									...d.llm,
+									gptKey: value,
+								},
+							}));
+						}}
+					/>
+					<label>API Key</label>
+				</div>
+
+				<div class="form-floating mb-2">
+					<select
+						class="form-select"
+						onChange={e => {
+							const value = e.currentTarget.value;
+							props.z.updateD(d => ({
+								...d,
+								llm: {
+									...d.llm,
+									gptModel: value,
+								},
+							}));
+						}}>
+						<For each={GPT_MODELS}>
+							{m => (
+								<option value={m} selected={m === props.z.d().llm.gptModel}>
+									{m}
+								</option>
+							)}
+						</For>
+					</select>
+					<label> Chat Model </label>
+				</div>
+			</Foldable>
 		</>
 	);
 };

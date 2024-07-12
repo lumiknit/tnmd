@@ -3,6 +3,7 @@ import { Component, createSignal, For } from "solid-js";
 import { DataState, execSetText } from "../../state";
 import { TbSparkles } from "solid-icons/tb";
 import toast from "solid-toast";
+import Foldable from "../Foldable";
 
 type Props = {
 	z: DataState;
@@ -89,60 +90,62 @@ const ActionGeminiView: Component<Props> = props => {
 				<label>Prompt</label>
 			</div>
 
-			<small>
-				You can find your API key here:{" "}
-				<a href="https://aistudio.google.com/app/apikey" target="_blank">
-					API Keys
-				</a>
-			</small>
-			<div class="form-floating mb-3">
-				<input
-					ref={apiKeyRef!}
-					type="text"
-					class="form-control"
-					placeholder="API Key"
-					value={props.z.d().llm.geminiKey}
-					onChange={e => {
-						const value = e.currentTarget.value;
-						props.z.updateD(d => ({
-							...d,
-							llm: {
-								...d.llm,
-								geminiKey: value,
-							},
-						}));
-					}}
-				/>
-				<label>API Key</label>
-			</div>
-
-			<div class="form-floating mb-2">
-				<select
-					class="form-select"
-					onChange={e => {
-						const value = e.currentTarget.value;
-						props.z.updateD(d => ({
-							...d,
-							llm: {
-								...d.llm,
-								geminiModel: value,
-							},
-						}));
-					}}>
-					<For each={GEMINI_MODELS}>
-						{m => (
-							<option value={m} selected={m === props.z.d().llm.geminiModel}>
-								{m}
-							</option>
-						)}
-					</For>
-				</select>
-				<label> Chat Model </label>
-			</div>
-
 			<button class="btn btn-primary" onClick={handleRun}>
 				<TbSparkles /> Run
 			</button>
+
+			<Foldable title="Advanced Options" class="mt-2">
+				<small>
+					You can find your API key here:{" "}
+					<a href="https://aistudio.google.com/app/apikey" target="_blank">
+						API Keys
+					</a>
+				</small>
+				<div class="form-floating mb-3">
+					<input
+						ref={apiKeyRef!}
+						type="text"
+						class="form-control"
+						placeholder="API Key"
+						value={props.z.d().llm.geminiKey}
+						onChange={e => {
+							const value = e.currentTarget.value;
+							props.z.updateD(d => ({
+								...d,
+								llm: {
+									...d.llm,
+									geminiKey: value,
+								},
+							}));
+						}}
+					/>
+					<label>API Key</label>
+				</div>
+
+				<div class="form-floating mb-2">
+					<select
+						class="form-select"
+						onChange={e => {
+							const value = e.currentTarget.value;
+							props.z.updateD(d => ({
+								...d,
+								llm: {
+									...d.llm,
+									geminiModel: value,
+								},
+							}));
+						}}>
+						<For each={GEMINI_MODELS}>
+							{m => (
+								<option value={m} selected={m === props.z.d().llm.geminiModel}>
+									{m}
+								</option>
+							)}
+						</For>
+					</select>
+					<label> Chat Model </label>
+				</div>
+			</Foldable>
 		</>
 	);
 };

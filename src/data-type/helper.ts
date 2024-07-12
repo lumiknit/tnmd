@@ -51,7 +51,10 @@ export const convertRawDataToAny = (data: RawData): any => {
 	return f(data);
 };
 
-export const randString = () => Math.random().toString(36).substring(7);
+const _randString = () => Math.random().toString(36).substring(7);
+const now = () => Date.now().toString(36);
+
+export const randString = () => _randString() + "--" + now();
 
 const escapeMap = new Map<string, string>([
 	["\x00", "x00"],
