@@ -73,7 +73,7 @@ const ActionGeminiView: Component<Props> = props => {
 					class="form-control"
 					placeholder="Prompt"
 					style={{
-						height: "10rem",
+						height: "13rem",
 					}}
 					onChange={e => {
 						const value = e.currentTarget.value;
