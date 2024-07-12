@@ -19,6 +19,20 @@ export type Action = {
 
 // Execute
 
+export class ActionApplyError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "ActionApplyError";
+	}
+}
+
+export class ActionApplyWarning extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "ActionApplyWarning";
+	}
+}
+
 export const applyAction = (
 	d: EditSet,
 	actionType: ActionType,
@@ -33,7 +47,7 @@ export const applyAction = (
 				newD.type = updateD.type;
 				const newConv = converters.get(newD.type);
 				if (!newConv) {
-					throw new Error(
+					throw new ActionApplyError(
 						`Convert for the data type ${newD.type} is not found`,
 					);
 				}
@@ -44,13 +58,16 @@ export const applyAction = (
 		case "runGPT":
 		case "runGemini":
 			if (updateD && updateD.str) {
+				if (newD.str === updateD.str) {
+					throw new ActionApplyWarning("String data is not changed");
+				}
 				newD.str = updateD.str;
 				newD.data = conv.parse(newD.str);
 			}
 			break;
 		case "parse":
 			if (typeof d.data !== "string") {
-				throw new Error("Expected string data to parse");
+				throw new ActionApplyError("Expected string data to parse");
 			}
 			newD.data = conv.parse(d.data as string);
 			newD.str = conv.stringify(newD.data);
@@ -68,7 +85,7 @@ export const applyAction = (
 					d.script.scriptWalk,
 				);
 				if (exeResult.error) {
-					throw exeResult.error;
+					throw new ActionApplyError(exeResult.error.message);
 				}
 				newD.data = exeResult.result;
 				newD.str = conv.stringify(newD.data);

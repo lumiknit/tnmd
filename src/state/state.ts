@@ -1,6 +1,12 @@
 import { Accessor, Setter, batch, createSignal } from "solid-js";
 import { DataType } from "../data-type";
-import { ActionType, Action, applyAction } from ".";
+import {
+	ActionType,
+	Action,
+	applyAction,
+	ActionApplyError,
+	ActionApplyWarning,
+} from ".";
 import { EditSet, loadInitEditSet, storeEditSet } from "./edit";
 import toast from "solid-toast";
 
@@ -77,19 +83,34 @@ export const execAction = (
 		try {
 			newD = applyAction(d, actionType, updateD);
 		} catch (e) {
-			state.setErr("Failed to execute action: " + e);
-			console.error(e);
-			toast.error("Error");
+			if (e instanceof ActionApplyWarning) {
+				console.warn(e);
+			} else {
+				state.setErr("Failed to execute action: " + e);
+				console.error(e);
+				toast.error("Error during action execution: " + e);
+			}
 			return;
 		}
 
 		const action = { type: actionType, oldD: d, newD };
+		const oldHistory = state.history();
+		const newActions = oldHistory.actions.slice(0, oldHistory.p);
+
+		while (action.type === "changeStr" && newActions.length > 0) {
+			const last = newActions[newActions.length - 1];
+			if (last.type !== action.type) break;
+			const a = newActions.pop();
+			action.oldD = a!.oldD;
+		}
+
+		newActions.push(action);
 
 		// Update the history
-		state.setHistory(h => ({
-			actions: [...h.actions.slice(0, h.p), action],
-			p: h.p + 1,
-		}));
+		state.setHistory({
+			actions: newActions,
+			p: newActions.length,
+		});
 
 		// Update d
 		state.updateD(() => newD);

@@ -1,7 +1,7 @@
 import { Component, createEffect, onCleanup, onMount } from "solid-js";
 
 import { EditorView, basicSetup } from "codemirror";
-import { keymap } from "@codemirror/view";
+import { keymap, ViewUpdate } from "@codemirror/view";
 import { Compartment, EditorState } from "@codemirror/state";
 import {
 	LanguageSupport,
@@ -93,6 +93,8 @@ const CodeMirror: Component<Props> = props => {
 	let state: EditorState;
 	let view: EditorView;
 
+	let onEditTimeout: number | null = null;
+
 	const langCompartment = new Compartment();
 	const themeCompartment = new Compartment();
 
@@ -124,6 +126,13 @@ const CodeMirror: Component<Props> = props => {
 				keymap.of([indentWithTab]),
 				langCompartment.of(wrapLang(lang)),
 				themeCompartment.of(getTheme(prefersDark.matches)),
+				EditorView.updateListener.of((v: ViewUpdate) => {
+					if (!v.docChanged) return;
+					if (onEditTimeout) clearTimeout(onEditTimeout);
+					onEditTimeout = setTimeout(() => {
+						props.onChange(v.state.doc.toString());
+					}, 1000);
+				}),
 			],
 		});
 
