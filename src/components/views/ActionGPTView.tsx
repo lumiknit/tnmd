@@ -1,4 +1,4 @@
-import { Component, createSignal, For } from "solid-js";
+import { Component, For } from "solid-js";
 
 import { DataState, execSetText } from "../../state";
 import { TbSparkles } from "solid-icons/tb";
@@ -10,7 +10,7 @@ type Props = {
 };
 
 const DEFAULT_OPENAI_BASE_URL = "https://api.openai.com";
-const GPT_MODELS = ["gpt-3.5-turbo", "gpt-4-turbo", "gpr-4o"];
+const GPT_MODELS = ["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"];
 
 const chatRequest = async (
 	systemPrompt: string,
