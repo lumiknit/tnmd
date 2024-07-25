@@ -6,6 +6,8 @@ import { DATA_TYPES, DATA_TYPE_TO_GRAMMAR } from "../../data-type";
 import { Dynamic } from "solid-js/web";
 import ObjectList from "../ObjectList";
 import toast from "solid-toast";
+import ListDataView from "./ListDataView";
+import TableDataView from "./TableDataView";
 
 type Props = {
 	z: DataState;
@@ -30,28 +32,26 @@ const CMDataView: Component<Props> = props => {
 	);
 };
 
-// List view
-
-const ListDataView: Component<Props> = props => {
-	return <ObjectList data={props.z.d().data} />;
-};
-
 type TabInfo = {
 	label: string;
 	component: Component<Props>;
 };
 
-const cmTab: TabInfo = {
-	label: "Editor",
-	component: CMDataView,
-};
-
-const listTab: TabInfo = {
-	label: "List",
-	component: ListDataView,
-};
-
-const tabs = [cmTab, listTab];
+/** Tab list */
+const tabs: TabInfo[] = [
+	{
+		label: "Editor",
+		component: CMDataView,
+	},
+	{
+		label: "List",
+		component: ListDataView,
+	},
+	{
+		label: "Table",
+		component: TableDataView,
+	},
+];
 
 const DataView: Component<Props> = props => {
 	const [currentTab, setCurrentTab] = createSignal(0);

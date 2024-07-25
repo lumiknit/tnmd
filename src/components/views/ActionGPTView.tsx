@@ -1,4 +1,4 @@
-import { Component, createSignal, For } from "solid-js";
+import { Component, For } from "solid-js";
 
 import { DataState, execSetText } from "../../state";
 import { TbSparkles } from "solid-icons/tb";
