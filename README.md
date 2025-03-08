@@ -1,5 +1,7 @@
 # tnmd: That's Not My Data!
 
+**Deprecated**: Most same features will be supported in [unhurry](https://github.com/lumiknit/unhurry)
+
 WebUI for data conversion & modification.
 
 https://lumiknit.github.io/apps/tnmd/
